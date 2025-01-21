@@ -40,6 +40,7 @@ component provides HTTPHandler requires io.Output out, data.IntUtil iu, io.FileS
 
 				resource = cgi.getRequest(cgiInfo)
 			} else if (httpMessage.command == "POST") {
+				out.println("\nhere1")
 
 				cgiInfo.redirectStatus 	= "TRUE" // not sure about this
 				cgiInfo.scriptFileName 	= httpMessage.resource
@@ -107,7 +108,7 @@ component provides HTTPHandler requires io.Output out, data.IntUtil iu, io.FileS
 		while (num_req < 100 && ss.keepAlive) {
 			
 			HTTPMessage httpMessage = httpUtil.readHTTPRequest(s)
-		
+			//out.println("here")
 			// client closed connection
 			if (httpMessage != null) {
 			
@@ -156,10 +157,13 @@ component provides HTTPHandler requires io.Output out, data.IntUtil iu, io.FileS
 					result = (1000 - msec) + dt.millisecond
 					result += (((60 - sec) + dt.second) - 1) * 1000
 				}
-
-				//out.println("$(debugMSG) eventAdded!");
+				char resource[] = httpUtil.normalisePath(httpMessage.resource)
+				perception.addEvent("entropy:$(resource)", 1)
 				perception.addMetric("response_time", result, false)
 				perception.addEvent(httpUtil.getEvent(httpMessage.mimeType), httpMessage.contentLength)
+
+
+
 				//perception.addTrace("$(ic.getMS()),$(httpMessage.resource),$(httpUtil.getEvent(httpMessage.mimeType))")
 				
 			} else {

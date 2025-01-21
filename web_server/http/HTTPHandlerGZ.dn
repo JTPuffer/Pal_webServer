@@ -170,8 +170,8 @@ component provides HTTPHandler requires io.Output out, data.IntUtil iu, io.FileS
 					result = (1000 - msec) + dt.millisecond
 					result += (((60 - sec) + dt.second) - 1) * 1000
 				}
-
-				//out.println("$(debugMSG) eventAdded!")
+				char resource[] = httpUtil.normalisePath(httpMessage.resource)
+				perception.addEvent("entropy:$(resource)", 1)
 				perception.addMetric("response_time", result, false)
 				perception.addEvent(httpUtil.getEvent(httpMessage.mimeType), httpMessage.contentLength)
 
