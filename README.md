@@ -29,12 +29,12 @@ Command prompt 3:
 
 Command prompt 3:
 
-curl localhost:8008/meta/get_all_configs
+    curl localhost:8008/meta/get_all_configs
 
 choose one config
 
 Command prompt 4:
-curl -X POST -H "Content-Type: text/json" -d '{"config" :"replace me with the config switch testing"}' localhost:8008/meta/set_config
+    curl -X POST -H "Content-Type: text/json" -d '{"config" :"replace me with the config switch testing"}' localhost:8008/meta/set_config
 
 
 response time is significantly higher when running client.cycle
