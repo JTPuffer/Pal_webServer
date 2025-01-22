@@ -3,22 +3,32 @@ const char debugMSG[] = "[@HTTPHandlerGZ]"
 
 data SocketState{
 	TCPSocket socket
-	bool socketBusy
+	bool socketWaiting
 	bool keepAlive
+	bool quit
 	}
+
+const int SLEEP_TIME = 100
+const int MAX_TIME = 5000
 
 component provides HTTPHandler requires io.Output out, data.IntUtil iu, io.FileSystem fileSystem, io.File, 
  	time.Timer t, time.Calendar ic, os.Run run, compression.Compression compress, cgi.CGI cgi, http.HTTPUtil httpUtil, pal.Perception perception {
 	
-	void startTimer(SocketState s, int sleep_time) {
-		t.sleep(sleep_time)
+	void startTimer(SocketState s, int sleep_time, int max_time) {
+		int time = 0
 
-		if (s.socketBusy == false) {
-			s.socket.disconnect()
-			s.keepAlive = false
-		} else {
-			startTimer(s, sleep_time)
-		}
+		while (s.socketWaiting)
+			{
+			t.sleep(sleep_time)
+			time += sleep_time
+
+			if (time >= max_time)
+				{
+				s.socket.disconnect()
+				s.keepAlive = false
+				s.quit = true
+				}
+			}
 	}
 
 	HTTPMessage processRequest(SocketState s, int sleep_time, int num_req, HTTPMessage httpMessage) {
@@ -65,7 +75,7 @@ component provides HTTPHandler requires io.Output out, data.IntUtil iu, io.FileS
 			
 			if (fd != null)
 				{
-				s.socketBusy = true
+				
 				s.socket.send("HTTP/1.1 200 OK\r\n")
 				s.socket.send("Server: $server_name\r\n")
 
@@ -87,7 +97,6 @@ component provides HTTPHandler requires io.Output out, data.IntUtil iu, io.FileS
 					tl += fbuf.arrayLength
 					s.socket.send(fbuf)
 				}
-				s.socketBusy = false
 
 				returnMessage.contentLength = tl
 				returnMessage.status = 200
@@ -112,14 +121,17 @@ component provides HTTPHandler requires io.Output out, data.IntUtil iu, io.FileS
 
 	void HTTPHandler:handleStream(TCPSocket s) {
 		int num_req = 0
-		int sleep_time = 5000
 		
-		SocketState ss = new SocketState(s, false, true)
-
-		asynch::startTimer(ss, sleep_time)
+		SocketState ss = new SocketState(s)
+		ss.keepAlive = true
 		
 		while (num_req < 100 && ss.keepAlive) {
+			ss.socketWaiting = true
+			Thread thread = asynch::startTimer(ss, SLEEP_TIME, MAX_TIME)
 			HTTPMessage httpMessage = httpUtil.readHTTPRequest(s)
+			ss.socketWaiting = false
+			if (ss.quit) return
+			thread.join()
 			
 			// client closed connection
 			if (httpMessage != null) {
@@ -137,7 +149,7 @@ component provides HTTPHandler requires io.Output out, data.IntUtil iu, io.FileS
 				if ((httpMessage.command == "GET") ||
 					(httpMessage.command == "POST")) {
 
-					httpMessage = processRequest(ss, sleep_time, num_req, httpMessage)
+					httpMessage = processRequest(ss, MAX_TIME, num_req, httpMessage)
 					if (httpMessage.status != 200) {
 						ss.keepAlive = false
 					}
@@ -145,12 +157,10 @@ component provides HTTPHandler requires io.Output out, data.IntUtil iu, io.FileS
 				} else {
 					// TODO: create a send method that will take the info from a variable 
 					// and write it to the socket
-					ss.socketBusy = true
 					s.send("HTTP/1.1 501 Not Implemented\r\n")
 					s.send("Server: $server_name\r\n")
 					s.send("Connection: close\r\n")
 					s.send("\r\n")
-					ss.socketBusy = false
 
 					httpMessage.mimeType = "501"
 					ss.keepAlive = false

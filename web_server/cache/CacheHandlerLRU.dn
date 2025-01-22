@@ -102,7 +102,7 @@ component provides cache.CacheHandler requires io.Output out, data.IntUtil iu, t
 			newEntry.contentSize = ncr.contentSize
 
 			if (cache == null) {
-				cache = new CachedResponse[MAX_SIZE]()
+				cache = new CachedResponse[MAX_SIZE]
 			}
 			
 			if (arraySize == MAX_SIZE) {
