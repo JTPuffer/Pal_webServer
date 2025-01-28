@@ -11,6 +11,11 @@ component provides HTTPHandler requires io.Output out, data.IntUtil iu, io.FileS
 	time.Timer t, time.Calendar ic, cgi.CGI cgi, http.HTTPUtil httpUtil, pal.Perception perception {
 	
 	void startTimer(SocketState s, int sleep_time) {
+		
+		//thread spins on done
+		//if it completes 5 successful spins it resumes the normal behvior 
+		//if it gets interupted it returns immideatly
+		
 		t.sleep(sleep_time)
 		
 		if (s.socketBusy == false) {
@@ -172,6 +177,7 @@ component provides HTTPHandler requires io.Output out, data.IntUtil iu, io.FileS
 
 			num_req++
 		}
+		//we dont need the thread here so we should just kill it but how ??
 
 		s.disconnect()
 	}

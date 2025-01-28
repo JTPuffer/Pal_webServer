@@ -12,7 +12,6 @@ Command prompt 1:
 
 
 # testing
-
 To run a machine learning experiment, you'll need three command prompts, as follows:
 
 Command prompt 1:
@@ -21,20 +20,36 @@ Command prompt 1:
     dnc .
     dana pal.rest WebServer.o
 
+
+
+Command prompt 2:
+
+    python3 measureVariance.py
+
+a Graph should pop up allow it to complete, the variance will be printed at the end, close the graph to kill the program once completed
+
+
 Command prompt 3:
 
-    dnc client
-    dana client.Cycle
+    git switch --detach  cba25b86e803da6a7bc898b475cb6501acb05c9f
+
+changes you to the branch with the old code 
 
 
-Command prompt 3:
-
-    curl localhost:8008/meta/get_all_configs
-
-choose one config
 
 Command prompt 4:
-    curl -X POST -H "Content-Type: text/json" -d '{"config" :"replace me with the config switch testing"}' localhost:8008/meta/set_config
+
+    python3 measureVariance.py
+
+compare the 2 results
 
 
-response time is significantly higher when running client.cycle
+to change back to the new code use
+
+Command prompt 5:
+    git switch old-code
+
+
+old-code branch is the branch with the new code on, i know its confusing
+
+

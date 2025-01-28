@@ -15,7 +15,6 @@ component provides App requires io.Output out, data.IntUtil iu, net.TCPSocket, n
 			out.println("Error: failed to bind master socket")
 			return 1
 		}
-
 		while (true) {
 			TCPSocket client = new TCPSocket()
 			if (client.accept(host)) {

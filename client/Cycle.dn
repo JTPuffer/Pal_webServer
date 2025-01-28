@@ -47,6 +47,7 @@ component provides App requires io.Output out, pal.control.RestAPI, net.http.HTT
 		{
 		FileEntry workloads[] = fileSystem.getDirectoryContents("workloads")
 		
+		int i =0
 		//test each option under each workload
 		for (int i = 0; i < workloads.arrayLength; i++)
 			{
